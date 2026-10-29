@@ -33,10 +33,19 @@ Tested on a GameCube with PicoBoot, video over the analog output.
 | Flashing over Bluetooth (blueretro.io/ota.html) and going back with a 30 s reset | ✅ |
 | **8BitDo GameCube Mod Kit**: detection, analog triggers, **rumble** | ✅ |
 | Xbox One controller incl. rumble | ✅ |
+| **Nintendo Switch 2 / NSO GameCube controller** (with the fixes from RyanCopley/BlueRetro) | ⏳ test pending |
 | Rumble enabled out of the box (Advanced config → Accessories) | ⏳ test pending |
 | **Sleep mode** (hold the reset button for 3 s while powering on) | ✅ |
 | GBA link in sleep mode: Final Fantasy Crystal Chronicles with the GBA as controller | ✅ |
 | GBA link with a BT controller: Pokémon Colosseum ↔ Pokémon LeafGreen | ✅ |
+
+**Nintendo Switch 2 / NSO GameCube controller:** BlueRetro v25.10-beta added support for the
+Switch 2 controller family, but left several bugs in it (e.g. only one NSO GameCube pad
+working, a corrupt pairing key locking a pad out for good, only one BLE controller at a time,
+links dropping while a second pad initialises). This build includes the fixes from
+[RyanCopley/BlueRetro](https://github.com/RyanCopley/BlueRetro) (one of them originally found
+by [bjerreman](https://github.com/bjerreman/BlueRetro-Switch2Fix)). The Melee-specific combo
+change from that fork is not included.
 
 Not tested separately but expected to work like regular BlueRetro: all other controllers
 supported by BlueRetro (PS3/PS4/PS5, Switch Pro/Joy-Con, Wii U Pro, …), several controllers
@@ -221,4 +230,5 @@ Locally (ESP-IDF 5.5):
     python3 tools/ibluecontrolmod/gen_otadata_ota0.py build/otadata_ota0.bin
 
 License: Apache-2.0 like BlueRetro. Thanks to Jacques Gagnon (darthcloud) for BlueRetro and to
-zeus86 for the dump and photos of the board.
+zeus86 for the dump and photos of the board, to Ryan Copley and bjerreman for the Switch 2 /
+NSO controller fixes.
