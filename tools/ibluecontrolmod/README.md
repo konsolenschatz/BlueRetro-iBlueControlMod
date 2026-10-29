@@ -1,223 +1,224 @@
-# BlueRetro für das AliExpress „iBlueControlMod“ GameCube-Board (V1.1)
+# BlueRetro for the AliExpress "iBlueControlMod" GameCube board (V1.1)
 
-Aktuelles [BlueRetro](https://github.com/darthcloud/BlueRetro) (Stand v25.10-beta) für das
-interne Bluetooth-Controllerport-Board „iBlueControlMod“ von AliExpress
-(ESP32-WROOM-32E, 8 MB Flash, Platinenaufdruck „V1.1“). Das Board ersetzt die
-Controllerport-Platine der GameCube, inklusive Reset-Taste und Uhr-Batterie.
+🇩🇪 **Deutsche Version:** [README.de.md](README.de.md)
 
-> **English summary:** Current BlueRetro for the AliExpress "iBlueControlMod" internal
-> GameCube board. Flash `BlueRetro_iblue_gc.bin` over Bluetooth with
-> https://blueretro.io/ota.html. The stock firmware stays in the factory slot; holding the
-> console reset button for 30 s always brings it back. The vendor's warning that BlueRetro
-> damages the board comes from two pin changes (power off on IO17, console enable on IO13
-> that must be held high) which this build takes care of.
+Current [BlueRetro](https://github.com/darthcloud/BlueRetro) (v25.10-beta) for the
+"iBlueControlMod" internal Bluetooth controller port board from AliExpress
+(ESP32-WROOM-32E, 8 MB flash, PCB marking "V1.1"). The board replaces the GameCube's
+controller port board, including the reset button and the clock battery.
 
-**Unterstützen:** Wenn dir das Projekt hilft, freue ich mich über eine kleine Spende per
-[PayPal](https://www.paypal.biz/PDHBeats). Mehr Retro-Mods gibt es auf meinem YouTube-Kanal
-[Konsolenschatz](https://www.youtube.com/@Konsolenschatz).
+**Support:** If this project helps you, a small donation via
+[PayPal](https://www.paypal.biz/PDHBeats) is very welcome. More retro mods on my YouTube
+channel [Konsolenschatz](https://www.youtube.com/@Konsolenschatz).
 
-## Inhalt
+## Contents
 
-* [Was funktioniert (getestet)](#was-funktioniert-getestet)
-* [Flashen per Bluetooth](#flashen-per-bluetooth)
-* [Zurück zur Original-Firmware](#zurück-zur-original-firmware)
-* [Reset-Taste und Schlafmodus](#reset-taste-und-schlafmodus)
-* [GBA-Link](#gba-link)
-* [Notfall: Wiederherstellung per Kabel (UART)](#notfall-wiederherstellung-per-kabel-uart)
-* [Was die chinesische Firmware vom Original unterscheidet](#was-die-chinesische-firmware-vom-original-unterscheidet)
-* [Wie die Firmware portiert wurde](#wie-die-firmware-portiert-wurde)
-* [Selbst bauen](#selbst-bauen)
+* [What works (tested)](#what-works-tested)
+* [Flashing over Bluetooth](#flashing-over-bluetooth)
+* [Back to the stock firmware](#back-to-the-stock-firmware)
+* [Reset button and sleep mode](#reset-button-and-sleep-mode)
+* [GBA link](#gba-link)
+* [Emergency recovery over a cable (UART)](#emergency-recovery-over-a-cable-uart)
+* [How the stock firmware differs from BlueRetro](#how-the-stock-firmware-differs-from-blueretro)
+* [How the port was done](#how-the-port-was-done)
+* [Building](#building)
 
-## Was funktioniert (getestet)
+## What works (tested)
 
-Getestet auf einer GameCube mit PicoBoot, Bild über den Analog-Ausgang.
+Tested on a GameCube with PicoBoot, video over the analog output.
 
-| Funktion | Ergebnis |
+| Feature | Result |
 |---|---|
-| Start und Bild | ✅ |
-| Flashen per Bluetooth (blueretro.io/ota.html) und Rückweg per 30 s Reset | ✅ |
-| **8BitDo GameCube Mod Kit**: Erkennung, analoge Schultertasten, **Rumble** | ✅ |
-| Xbox-One-Controller inkl. Rumble | ✅ |
-| Rumble ab Werk eingeschaltet (Advanced Config → Accessories) | ✅ |
-| **Schlafmodus** (Reset-Taste beim Einschalten 3 s halten) | ✅ |
-| GBA-Link im Schlafmodus: Final Fantasy Crystal Chronicles mit GBA als Controller | ✅ |
-| GBA-Link mit BT-Controller: Pokémon Colosseum ↔ Pokémon Blattgrün | ✅ |
+| Boot and video | ✅ |
+| Flashing over Bluetooth (blueretro.io/ota.html) and going back with a 30 s reset | ✅ |
+| **8BitDo GameCube Mod Kit**: detection, analog triggers, **rumble** | ✅ |
+| Xbox One controller incl. rumble | ✅ |
+| Rumble enabled out of the box (Advanced config → Accessories) | ⏳ test pending |
+| **Sleep mode** (hold the reset button for 3 s while powering on) | ✅ |
+| GBA link in sleep mode: Final Fantasy Crystal Chronicles with the GBA as controller | ✅ |
+| GBA link with a BT controller: Pokémon Colosseum ↔ Pokémon LeafGreen | ✅ |
 
-Nicht eigens getestet, sollte aber wie im normalen BlueRetro funktionieren: alle anderen
-von BlueRetro unterstützten Controller (PS3/PS4/PS5, Switch Pro/Joy-Con, Wii U Pro, …),
-mehrere Controller gleichzeitig und die Web-Konfiguration auf https://blueretro.io.
+Not tested separately but expected to work like regular BlueRetro: all other controllers
+supported by BlueRetro (PS3/PS4/PS5, Switch Pro/Joy-Con, Wii U Pro, …), several controllers
+at once and the web configuration at https://blueretro.io.
 
-## Flashen per Bluetooth
+## Flashing over Bluetooth
 
-Die Original-Firmware bringt den OTA-Mechanismus von BlueRetro v1.9 mit, die offizielle
-Update-Seite funktioniert deshalb direkt. Du brauchst Chrome oder Edge am PC oder Chrome
-unter Android (Web Bluetooth).
+The stock firmware contains the OTA mechanism of BlueRetro v1.9, so the official update page
+works directly. You need Chrome or Edge on a PC, or Chrome on Android (Web Bluetooth).
 
-1. Aus dem [Release](../../releases) `BlueRetro_iblue_gc.bin` herunterladen.
-2. Alle Bluetooth-Controller ausschalten, Konsole einschalten.
-3. https://blueretro.io/ota.html öffnen, **Connect BlueRetro** klicken und das Gerät
-   `BlueRetro…` auswählen.
-4. `BlueRetro_iblue_gc.bin` auswählen und **Update Firmware** klicken.
-   Das dauert einige Minuten, die Konsole dabei nicht ausschalten.
-5. Nach „OTA FW Update sucessfull!“ die Konsole aus- und wieder einschalten.
+1. Download `BlueRetro_iblue_gc.bin` from the [release](../../releases).
+2. Switch off all Bluetooth controllers, switch on the console.
+3. Open https://blueretro.io/ota.html, click **Connect BlueRetro** and select the
+   `BlueRetro…` device.
+4. Select `BlueRetro_iblue_gc.bin` and click **Update Firmware**.
+   This takes a few minutes; do not switch off the console meanwhile.
+5. After "OTA FW Update sucessfull!" switch the console off and on again.
 
-Bricht das Update ab, bleibt die bisherige Firmware aktiv. Die neue wird erst nach
-erfolgreicher Prüfung als Startpartition gesetzt.
+If the update is interrupted, the previous firmware stays active. The new one only becomes
+the boot partition after it has been verified.
 
-**Welche Datei?**
+**Which file?**
 
-| Datei | Wofür |
+| File | Purpose |
 |---|---|
-| `BlueRetro_iblue_gc.bin` | **Normale Firmware**, für alle |
-| `BlueRetro_iblue_gc_safe.bin` | Nur falls das Board mit der normalen Firmware neu startet oder Bluetooth ständig abreißt: geringere Sendeleistung, Brownout-Schutz aus, 20 s keine Kopplungssuche nach dem Start |
-| `otadata_ota0.bin` | Nur für das Flashen per Kabel (siehe unten) |
-| `otadata_leer.bin` | Nur für die Notfall-Wiederherstellung per Kabel |
+| `BlueRetro_iblue_gc.bin` | **Regular firmware**, for everyone |
+| `BlueRetro_iblue_gc_safe.bin` | Only if the board reboots or Bluetooth keeps dropping with the regular firmware: lower TX power, brownout detection off, no pairing scan during the first 20 s |
+| `otadata_ota0.bin` | Only for flashing over a cable (see below) |
+| `otadata_leer.bin` | Only for emergency recovery over a cable ("leer" = empty) |
 
-Die Dateien heißen bewusst nicht „hw2“: Die Update-Seite hält die Original-Firmware
-(Version „1“) für HW1 und würde eine „hw2“-Datei mit „Hardware and firmware mismatch!“
-ablehnen.
+The files deliberately do not contain "hw2" in their name: the update page treats the stock
+firmware (version "1") as HW1 and would reject a "hw2" file with
+"Hardware and firmware mismatch!".
 
-## Zurück zur Original-Firmware
+## Back to the stock firmware
 
-Die Original-Firmware wird nie überschrieben. Sie liegt im Factory-Bereich, BlueRetro
-landet im Bereich `ota_0`.
+The stock firmware is never overwritten. It lives in the factory slot, BlueRetro goes into
+the `ota_0` slot.
 
-* **Reset-Taste der Konsole 30 s gedrückt halten** (Konsole an). BlueRetro löscht seine
-  Einstellungen und die Startauswahl, danach startet wieder die Original-Firmware.
-* Danach kannst du jederzeit wieder BlueRetro per Bluetooth aufspielen.
+* **Hold the console reset button for 30 s** (console on). BlueRetro erases its settings and
+  the boot selection, then the stock firmware starts again.
+* You can flash BlueRetro again over Bluetooth at any time.
 
-## Reset-Taste und Schlafmodus
+## Reset button and sleep mode
 
-| Reset-Taste halten (Konsole an) | Wirkung | Port-LEDs während des Haltens |
+| Hold reset (console on) | Effect | Port LEDs while holding |
 |---|---|---|
-| kurz (< 3 s) | Konsole zurücksetzen (wie die originale Reset-Taste) | an |
-| 3–6 s | Alle BT-Controller trennen bzw. Kopplungssuche beenden | blinken langsam |
-| 6–9 s | Kopplungssuche starten | blinken schneller |
-| > 9 s | BlueRetro-Einstellungen und Kopplungen löschen | blinken schnell |
-| 30 s | Zusätzlich zurück zur Original-Firmware | |
+| short (< 3 s) | Reset the console (like the original reset button) | on |
+| 3–6 s | Disconnect all BT controllers or stop the pairing scan | blink slowly |
+| 6–9 s | Start the pairing scan | blink faster |
+| > 9 s | Erase BlueRetro settings and pairings | blink fast |
+| 30 s | Additionally go back to the stock firmware | |
 
-**Schlafmodus:** Reset-Taste gedrückt halten, **während** du die Konsole einschaltest, und
-nach etwa 3 s loslassen. Bluetooth geht aus, die Platine greift nicht mehr in die
-Controller-Ports ein und die Konsole startet normal. Gedacht für Zubehör, das sich mit
-BlueRetro nicht verträgt, zum Beispiel den GBA als Controller in Final Fantasy Crystal
-Chronicles. Zum Steuern dann einen Original-Controller mit Kabel benutzen.
-Normalbetrieb: Konsole aus- und ohne gedrückte Taste wieder einschalten.
+**Sleep mode:** hold the reset button **while** switching on the console and release it after
+about 3 s. Bluetooth turns off, the board stops driving the controller ports and the console
+boots normally. Meant for accessories that don't get along with BlueRetro, e.g. the GBA as a
+controller in Final Fantasy Crystal Chronicles. Use a wired original controller to play.
+Back to normal: switch the console off and on again without holding the button.
 
-## GBA-Link
+## GBA link
 
-Das Board treibt einen Controller-Port nur, wenn dort ein Bluetooth-Controller
-zugeordnet ist. Ein eingestecktes GBA-Link-Kabel erkennt das Board nicht als Controller,
-deshalb:
+The board only drives a controller port when a Bluetooth controller is assigned to it.
+A plugged-in GBA link cable is not detected as a controller, therefore:
 
-* **Pokémon Colosseum/XD ↔ GBA:** Einen BT-Controller verbinden (landet auf Port 1), den
-  GBA an einen anderen Port stecken. Keinen weiteren BT-Controller verbinden, sonst
-  bekommt dieser den Port des GBA.
-* **Final Fantasy Crystal Chronicles** und andere Spiele, in denen alle Spieler einen GBA
-  benutzen: im **Schlafmodus** starten.
+* **Pokémon Colosseum/XD ↔ GBA:** connect one BT controller (it gets port 1) and plug the GBA
+  into another port. Don't connect another BT controller, it would take the GBA's port.
+* **Final Fantasy Crystal Chronicles** and other games where every player uses a GBA:
+  boot in **sleep mode**.
 
-## Notfall: Wiederherstellung per Kabel (UART)
+## Emergency recovery over a cable (UART)
 
-Nur nötig, falls eine Firmware gar nicht mehr startet und weder Bluetooth noch die
-Reset-Taste reagieren. Bootloader und Original-Firmware werden dabei nicht verändert.
+Only needed if a firmware doesn't start at all and neither Bluetooth nor the reset button
+respond. The bootloader and the stock firmware are not touched.
 
-Du brauchst einen USB-Seriell-Adapter mit **3,3 V**-Pegel (getestet: DSD TECH SH-U09B3,
-CP2102N) und Chrome oder Edge.
+You need a USB serial adapter with **3.3 V** levels (tested: DSD TECH SH-U09B3, CP2102N) and
+Chrome or Edge.
 
-**Debug-Header** neben dem ESP32 (6 Löcher, das eckige Pad ist Loch 1):
+**Debug header** next to the ESP32 (6 holes, the square pad is hole 1):
 
-| Loch | Signal | Adapter |
+<img src="img/header_pinout_en.jpg" alt="Debug header pinout" width="420">
+
+| Hole | Signal | Adapter |
 |---|---|---|
-| 1 (eckig) | GND | GND |
+| 1 (square) | GND | GND |
 | 2 | IO1 / TX | RXD |
 | 3 | IO3 / RX | TXD |
-| 4 | EN | frei |
-| 5 | IO0 | nur zum Flashen auf GND (z. B. Metallgehäuse eines Controllerports) |
-| 6 | 3V3 | **frei**, das Board bekommt Strom von der Konsole |
+| 4 | EN | unconnected |
+| 5 | IO0 | to GND only for flashing (e.g. the metal shell of a controller port) |
+| 6 | 3V3 | **unconnected**, the board is powered by the console |
 
-5V0, RTS und CTS des Adapters bleiben frei.
+The adapter's 5V0, RTS and CTS stay unconnected.
 
-1. Konsole aus, Kabel anschließen, IO0 auf GND brücken.
-2. Konsole einschalten. Der ESP32 startet im Download-Modus.
-3. https://espressif.github.io/esptool-js/ öffnen, Baudrate 115200, **Connect**.
-   Kommt keine Verbindung, TXD und RXD tauschen.
-4. Flash Address **`0xd000`**, Datei **`otadata_leer.bin`**, **Program**.
-   **Nicht „Erase Flash“ drücken**, das würde auch die Original-Firmware löschen.
-5. Konsole aus, IO0-Brücke entfernen, Konsole ein: Die Original-Firmware läuft wieder.
+![Wiring of the USB serial adapter](img/wiring_en.png)
 
-**Boot-Log mitlesen:** gleiche Verkabelung ohne IO0-Brücke, z. B. mit
-https://serial.huhn.me/ und **921600 Baud**, Monitor verbinden und dann die Konsole einschalten.
+1. Console off, connect the wires, bridge IO0 to GND.
+2. Switch on the console. The ESP32 starts in download mode.
+3. Open https://espressif.github.io/esptool-js/, baud rate 115200, **Connect**.
+   If it doesn't connect, swap TXD and RXD.
+4. Flash Address **`0xd000`**, file **`otadata_leer.bin`**, **Program**.
+   **Do not press "Erase Flash"**, that would also erase the stock firmware.
+5. Console off, remove the IO0 bridge, console on: the stock firmware runs again.
 
-**BlueRetro per Kabel flashen** (statt Bluetooth): wie oben, aber zwei Dateien schreiben:
-`otadata_ota0.bin` an `0xd000` und `BlueRetro_iblue_gc.bin` an `0x110000`.
+**Reading the boot log:** same wiring without the IO0 bridge, e.g. with
+https://serial.huhn.me/ at **921600 baud**. Connect the monitor first, then switch on the
+console.
 
-## Was die chinesische Firmware vom Original unterscheidet
+**Flashing BlueRetro over the cable** (instead of Bluetooth): as above, but write two files:
+`otadata_ota0.bin` at `0xd000` and `BlueRetro_iblue_gc.bin` at `0x110000`.
 
-Die Original-Firmware des Boards (Dump im Repo
+## How the stock firmware differs from BlueRetro
+
+The board's stock firmware (dump in
 [zeus86/blueretro-gc-internal-hw2-aliexpress](https://github.com/zeus86/blueretro-gc-internal-hw2-aliexpress))
-ist ein leicht angepasstes **BlueRetro v1.9 / v1.9.1-beta** (Stand 2023), gebaut mit
-ESP-IDF v5.1.1, App-Version „1“. Partitionstabelle, Bluetooth-Konfigurationsdienst und
-OTA sind mit BlueRetro identisch. Unterschiede:
+is a slightly modified **BlueRetro v1.9 / v1.9.1-beta** (2023), built with ESP-IDF v5.1.1,
+app version "1". Partition table, Bluetooth configuration service and OTA are identical to
+BlueRetro. The differences:
 
-| Funktion | BlueRetro HW2 | iBlueControlMod |
+| Function | BlueRetro HW2 | iBlueControlMod |
 |---|---|---|
-| Konsole AUS (Power off) | IO16 | **IO17** |
-| Konsole AN (IO13) | 20-ms-Puls nur bei Bedarf | **1 s nach dem Start HIGH und dauerhaft halten**, sonst bleibt das Bild schwarz |
-| Reset-Taste (Eingang) | IO0 | **IO16** (interner Pull-up nötig) |
-| Status-LED | IO17 (PWM) | RGB-LED, aktiv-low: grün IO22, blau IO23, rot IO18 |
-| Port-LEDs P1..P4 | IO2, IO4, IO12, IO15 | **IO15, IO4, IO2, IO12** |
-| Reset / Power-Sense | IO14 / IO39 | gleich |
-| Port-Erkennung P1..P4 | IO35, IO36, IO32, IO33 | gleich |
-| Controller-Daten P1..P4 | IO19, IO5, IO26, IO27 | gleich |
-| Reset-Taste Schwellen | 1 s / 3 s / 6 s | 3 s / 6 s / 9 s |
-| Reset-Taste beim Einschalten | Deep Sleep | eigene Schlaf-Task |
+| Console power off | IO16 | **IO17** |
+| Console enable (IO13) | 20 ms pulse only when needed | **set HIGH 1 s after boot and kept high**, otherwise no video |
+| Reset button (input) | IO0 | **IO16** (internal pull-up required) |
+| Status LED | IO17 (PWM) | RGB LED, active low: green IO22, blue IO23, red IO18 |
+| Port LEDs P1..P4 | IO2, IO4, IO12, IO15 | **IO15, IO4, IO2, IO12** |
+| Reset / power sense | IO14 / IO39 | same |
+| Port detection P1..P4 | IO35, IO36, IO32, IO33 | same |
+| Controller data P1..P4 | IO19, IO5, IO26, IO27 | same |
+| Reset button thresholds | 1 s / 3 s / 6 s | 3 s / 6 s / 9 s |
+| Reset button held at power on | deep sleep | its own sleep task |
 
-Dazu kommen nur chinesische Log-Ausgaben. Funktional ist der Rest BlueRetro v1.9.
-Insbesondere fehlt der Original-Firmware alles, was BlueRetro seitdem dazugelernt hat,
-zum Beispiel die Unterstützung für das 8BitDo GameCube Mod Kit (analoge Schultertasten
-und Rumble).
+Apart from that there is only additional Chinese log output. Functionally the rest is
+BlueRetro v1.9. In particular the stock firmware lacks everything BlueRetro gained since then,
+for example support for the 8BitDo GameCube Mod Kit (analog triggers and rumble).
 
-**Warum originales BlueRetro das Board „beschädigt“ (Herstellerwarnung):** Original-BlueRetro
-für HW2 benutzt IO17 als blinkende Status-LED. Auf diesem Board hängt an IO17 aber die
-Leitung zum Ausschalten der Konsole. Außerdem setzt es IO13 nicht dauerhaft auf HIGH,
-die Konsole bleibt dann schwarz. Kaputt geht dabei nichts, mit 30 s Reset bzw. per Kabel
-kommt man immer zurück.
+A function-by-function comparison of the stock firmware against a rebuild of the BlueRetro v1.9
+source (same ESP-IDF version) found no other logic differences: the controller port driver,
+the pin setup, the boot sequence, the Bluetooth init sequence and the start values of all
+GameCube-related tables are identical. Only the tables for other systems (PC-FX, parallel
+adapters) differ slightly, which suggests the vendor built from a commit close to, but not
+exactly, the v1.9 tag.
 
-## Wie die Firmware portiert wurde
+**Why the vendor warns that BlueRetro "damages" the board:** regular BlueRetro for HW2 uses
+IO17 as a blinking status LED, but on this board IO17 is the console power-off line. It also
+doesn't keep IO13 high, so the console stays black. Nothing actually breaks; a 30 s reset or the
+cable recovery always brings the board back.
 
-1. **Analyse der Original-Firmware:** Die App-Partition wurde aus dem Flash-Dump
-   extrahiert und disassembliert (Capstone, Xtensa). Anhand der Text-Strings und des
-   bekannten BlueRetro-v1.9-Quellcodes wurden die Funktionen zugeordnet und die
-   Pin-Belegung oben abgeleitet.
-2. **Board-Variante im aktuellen BlueRetro:** `CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD`
-   (`configs/hw2/gamecube_ibluecontrolmod`) setzt die Pins, die Reset-Taste auf IO16 mit
-   Pull-up, die Schwellen 3/6/9 s und Hotplug (ein Port wird erst angesteuert, wenn dort
-   ein BT-Controller verbunden ist; das hält Ports für den GBA frei).
-3. **Fehlersuche „kein Bild“:** Die ersten Builds starteten, aber die Konsole blieb
-   schwarz. Ein Funktions- und Datenvergleich zwischen der Original-Firmware und einem
-   eigenen v1.9-Rebuild zeigte keinen Unterschied in der Programmlogik. Erst der Vergleich
-   der seriellen Boot-Logs zeigte, dass die Original-Firmware 1 s nach dem Start IO13
-   (Konsole AN) auf HIGH setzt und hält. Das ist jetzt nachgebaut, auch im Schlafmodus.
-4. **Komfort:** Rumble ist ab Werk eingeschaltet. Die Original-Firmware legt nach einem
-   Reset ihre Konfiguration mit Rumble aus neu an, deshalb schaltet BlueRetro es beim ersten
-   Start einmalig ein. Eine spätere eigene Einstellung bleibt erhalten.
-5. **OTA-kompatibel:** Der Dateiname enthält kein „hw2“, damit blueretro.io/ota.html das
-   Update von der Original-Firmware aus akzeptiert.
+## How the port was done
 
-Im Ordner `stockpatch/` liegt außerdem ein älterer Binär-Patch, der der Original-Firmware
-nur die 8BitDo-Mod-Kit-Unterstützung hinzufügt. Mit dieser Firmware wird er nicht mehr
-gebraucht.
+1. **Analysing the stock firmware:** the app partition was extracted from the flash dump and
+   disassembled (Capstone, Xtensa). Using the text strings and the known BlueRetro v1.9 source,
+   the functions were matched and the pinout above was derived.
+2. **Board variant in current BlueRetro:** `CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD`
+   (`configs/hw2/gamecube_ibluecontrolmod`) sets the pins, the reset button on IO16 with
+   pull-up, the 3/6/9 s thresholds and hotplug (a port is only driven once a BT controller is
+   connected to it, which keeps ports free for the GBA).
+3. **Hunting the "no video" bug:** the first builds booted, but the console stayed black.
+   Bisecting test builds (no console control lines, no controller port driver, lower Bluetooth
+   TX power, brownout detection off) and a rebuild of BlueRetro v1.9 with the stock pinout were
+   all black as well. A function and data comparison between the stock firmware and the v1.9
+   rebuild showed no difference in the program logic. Only comparing the serial boot logs of
+   both firmwares revealed it: one second after start the stock firmware logs
+   `POWER_ON_PIN 1` and keeps IO13 high. That is now replicated, also in sleep mode.
+4. **Convenience:** rumble is enabled out of the box. After a reset the stock firmware recreates
+   its configuration with rumble off, so BlueRetro switches it on once on its first boot. A
+   later choice of your own is kept.
+5. **OTA compatible:** the file name contains no "hw2", so blueretro.io/ota.html accepts the
+   update while the stock firmware is running.
 
-## Selbst bauen
+The `stockpatch/` folder also contains an older binary patch that only adds 8BitDo Mod Kit
+support to the stock firmware. It is not needed with this firmware.
 
-GitHub Actions: Workflow „ibluecontrolmod“ läuft bei jedem Push auf `main`. Manuell über
-„Run workflow“ mit ausgefülltem `release_tag` (z. B. `v25.10-iblue.2`) entsteht zusätzlich
-ein Release-Entwurf mit allen Dateien.
+## Building
 
-Lokal (ESP-IDF 5.5):
+GitHub Actions: the "ibluecontrolmod" workflow runs on every push to `master`. Running it
+manually ("Run workflow") with `release_tag` filled in (e.g. `v25.10-iblue.2`) additionally
+creates a draft release with all files.
+
+Locally (ESP-IDF 5.5):
 
     cp configs/hw2/gamecube_ibluecontrolmod sdkconfig
     BR_HW=_iblue BR_SYS=_gc idf.py reconfigure build
     python3 tools/ibluecontrolmod/gen_otadata_ota0.py build/otadata_ota0.bin
 
-Lizenz: Apache-2.0 wie BlueRetro. Danke an Jacques Gagnon (darthcloud) für BlueRetro und an
-zeus86 für Dump und Fotos des Boards.
+License: Apache-2.0 like BlueRetro. Thanks to Jacques Gagnon (darthcloud) for BlueRetro and to
+zeus86 for the dump and photos of the board.

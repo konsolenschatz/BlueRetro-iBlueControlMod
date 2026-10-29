@@ -1,26 +1,23 @@
-# BlueRetro für das AliExpress „iBlueControlMod“ GameCube-Board
+# BlueRetro for the AliExpress "iBlueControlMod" GameCube board
 
-Aktuelles [BlueRetro](https://github.com/darthcloud/BlueRetro) für das interne
-Bluetooth-Controllerport-Board „iBlueControlMod“ von AliExpress (Platinenaufdruck „V1.1“).
-Mit 8BitDo-GameCube-Mod-Kit-Unterstützung inklusive analoger Schultertasten und Rumble,
-Schlafmodus und funktionierendem GBA-Link.
+🇩🇪 **Deutsch:** [Anleitung auf Deutsch](tools/ibluecontrolmod/README.de.md)
 
-* **Download:** [Releases](../../releases), Datei `BlueRetro_iblue_gc.bin`
-* **Anleitung** (Flashen per Bluetooth, Rückweg zur Original-Firmware, Reset-Taste, GBA-Link,
-  Unterschiede zur chinesischen Firmware): [tools/ibluecontrolmod/README.md](tools/ibluecontrolmod/README.md)
+Current [BlueRetro](https://github.com/darthcloud/BlueRetro) for the AliExpress
+"iBlueControlMod" internal Bluetooth controller port board (PCB marking "V1.1"), with
+8BitDo GameCube Mod Kit support including analog triggers and rumble, a sleep mode and a
+working GBA link.
 
-> **English:** Current BlueRetro for the AliExpress "iBlueControlMod" internal GameCube board.
-> Get `BlueRetro_iblue_gc.bin` from the releases and flash it with https://blueretro.io/ota.html.
-> Holding the console reset button for 30 s returns to the stock firmware.
-> Support the project: [PayPal](https://www.paypal.biz/PDHBeats) · YouTube: [Konsolenschatz](https://www.youtube.com/@Konsolenschatz)
-> Details (German, with English summary): [tools/ibluecontrolmod/README.md](tools/ibluecontrolmod/README.md)
+* **Download:** [Releases](../../releases), file `BlueRetro_iblue_gc.bin`
+* **Guide** (flashing over Bluetooth, going back to the stock firmware, reset button, GBA link,
+  cable recovery with pinout photos, differences to the Chinese firmware):
+  [tools/ibluecontrolmod/README.md](tools/ibluecontrolmod/README.md)
 
-**Unterstützen:** Wenn dir das Projekt hilft, freue ich mich über eine kleine Spende per
-[PayPal](https://www.paypal.biz/PDHBeats). Mehr Retro-Mods gibt es auf meinem YouTube-Kanal
-[Konsolenschatz](https://www.youtube.com/@Konsolenschatz).
+**Support:** If this project helps you, a small donation via
+[PayPal](https://www.paypal.biz/PDHBeats) is very welcome. More retro mods on my YouTube
+channel [Konsolenschatz](https://www.youtube.com/@Konsolenschatz).
 
-Unabhängiges Community-Projekt, nicht verbunden mit dem Hersteller des Boards oder mit
-dem BlueRetro-Projekt. Nutzung auf eigene Gefahr.
+Independent community project, not affiliated with the board's manufacturer or with the
+BlueRetro project. Use at your own risk.
 
 Below is the original BlueRetro README.
 

@@ -1,52 +1,53 @@
-Aktuelles BlueRetro (Stand v25.10-beta) für das AliExpress-Board **„iBlueControlMod“**,
-das interne Bluetooth-Controllerport-Board für die GameCube (Platinenaufdruck „V1.1“).
+Current BlueRetro (v25.10-beta) for the AliExpress **"iBlueControlMod"** board, the internal
+Bluetooth controller port board for the GameCube (PCB marking "V1.1").
 
-## Neu gegenüber der Original-Firmware des Boards
+## New compared to the board's stock firmware
 
-* **8BitDo GameCube Mod Kit:** wird erkannt, mit analogen Schultertasten und Rumble
-* Alle Verbesserungen von BlueRetro seit v1.9, auf der die Original-Firmware basiert
-* **Rumble ab Werk eingeschaltet**
-* **Schlafmodus** (Reset-Taste beim Einschalten 3 s halten), z. B. für Final Fantasy
-  Crystal Chronicles mit GBA als Controller
-* **GBA-Link** mit BT-Controller, z. B. Pokémon Colosseum ↔ Pokémon Blattgrün
+* **8BitDo GameCube Mod Kit:** detected, with analog triggers and rumble
+* All BlueRetro improvements since v1.9, which the stock firmware is based on
+* **Rumble enabled out of the box**
+* **Sleep mode** (hold the reset button for 3 s while powering on), e.g. for Final Fantasy
+  Crystal Chronicles with the GBA as controller
+* **GBA link** with a BT controller, e.g. Pokémon Colosseum ↔ Pokémon LeafGreen
 
-## Getestet
+## Tested
 
-Start und Bild, Flashen per Bluetooth und Rückweg per 30 s Reset, 8BitDo GameCube Mod Kit
-inkl. analoger Trigger und Rumble, Xbox-One-Controller inkl. Rumble, Schlafmodus,
-GBA-Link mit Final Fantasy Crystal Chronicles (Schlafmodus) und Pokémon Colosseum ↔
-Blattgrün (mit BT-Controller).
+Boot and video, flashing over Bluetooth and going back with a 30 s reset, 8BitDo GameCube Mod
+Kit incl. analog triggers and rumble, Xbox One controller incl. rumble, sleep mode, GBA link
+with Final Fantasy Crystal Chronicles (sleep mode) and Pokémon Colosseum ↔ LeafGreen (with a
+BT controller).
 
 ## Installation
 
-1. `BlueRetro_iblue_gc.bin` herunterladen.
-2. Konsole einschalten, BT-Controller aus.
-3. In Chrome/Edge https://blueretro.io/ota.html öffnen, **Connect BlueRetro**, Datei
-   auswählen, **Update Firmware**. Danach Konsole aus- und einschalten.
+1. Download `BlueRetro_iblue_gc.bin`.
+2. Switch on the console, BT controllers off.
+3. In Chrome/Edge open https://blueretro.io/ota.html, **Connect BlueRetro**, select the file,
+   **Update Firmware**. Then switch the console off and on.
 
-**Zurück zur Original-Firmware:** Reset-Taste der Konsole 30 s gedrückt halten. Die
-Original-Firmware wird nie überschrieben.
+**Back to the stock firmware:** hold the console reset button for 30 s. The stock firmware is
+never overwritten.
 
-Ausführliche Anleitung, Notfall-Wiederherstellung per Kabel und alle Unterschiede zur
-chinesischen Firmware: [tools/ibluecontrolmod/README.md](https://github.com/konsolenschatz/BlueRetro-iBlueControlMod/blob/master/tools/ibluecontrolmod/README.md)
+Full guide, cable recovery with pinout photos and all differences to the Chinese firmware:
+[English](https://github.com/konsolenschatz/BlueRetro-iBlueControlMod/blob/master/tools/ibluecontrolmod/README.md) ·
+[Deutsch](https://github.com/konsolenschatz/BlueRetro-iBlueControlMod/blob/master/tools/ibluecontrolmod/README.de.md)
 
-## Dateien
+## Files
 
-| Datei | Wofür |
+| File | Purpose |
 |---|---|
-| `BlueRetro_iblue_gc.bin` | **Normale Firmware**, für alle |
-| `BlueRetro_iblue_gc_safe.bin` | Nur falls das Board neu startet oder Bluetooth ständig abreißt: geringere Sendeleistung, Brownout-Schutz aus |
-| `otadata_ota0.bin` | Nur für das Flashen per Kabel (an `0xd000`, Firmware an `0x110000`) |
-| `otadata_leer.bin` | Nur für die Notfall-Wiederherstellung per Kabel (an `0xd000`) |
+| `BlueRetro_iblue_gc.bin` | **Regular firmware**, for everyone |
+| `BlueRetro_iblue_gc_safe.bin` | Only if the board reboots or Bluetooth keeps dropping: lower TX power, brownout detection off |
+| `otadata_ota0.bin` | Only for flashing over a cable (at `0xd000`, firmware at `0x110000`) |
+| `otadata_leer.bin` | Only for emergency recovery over a cable (at `0xd000`) |
 
-**Unterstützen:** Wenn dir das Projekt hilft, freue ich mich über eine kleine Spende per
-[PayPal](https://www.paypal.biz/PDHBeats). Mehr Retro-Mods gibt es auf meinem YouTube-Kanal
-[Konsolenschatz](https://www.youtube.com/@Konsolenschatz).
+**Support:** If this project helps you, a small donation via
+[PayPal](https://www.paypal.biz/PDHBeats) is very welcome. More retro mods on my YouTube
+channel [Konsolenschatz](https://www.youtube.com/@Konsolenschatz).
 
 ---
 
-**English:** Current BlueRetro for the AliExpress "iBlueControlMod" internal GameCube board,
-with 8BitDo GameCube Mod Kit support (analog triggers, rumble), rumble on by default, sleep
-mode (hold reset while powering on) and working GBA link. Flash `BlueRetro_iblue_gc.bin` with
-https://blueretro.io/ota.html; hold the console reset button for 30 s to return to the stock
-firmware.
+**Deutsch:** Aktuelles BlueRetro für das AliExpress-Board „iBlueControlMod“ mit Unterstützung
+für das 8BitDo GameCube Mod Kit (analoge Schultertasten, Rumble), Rumble ab Werk, Schlafmodus
+(Reset-Taste beim Einschalten 3 s halten) und funktionierendem GBA-Link. `BlueRetro_iblue_gc.bin`
+über https://blueretro.io/ota.html flashen; zurück zur Original-Firmware mit 30 s Reset-Taste.
+[Ausführliche Anleitung auf Deutsch](https://github.com/konsolenschatz/BlueRetro-iBlueControlMod/blob/master/tools/ibluecontrolmod/README.de.md)
