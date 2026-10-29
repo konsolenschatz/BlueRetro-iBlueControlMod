@@ -29,12 +29,21 @@
 #include "bare_metal_app_cpu.h"
 #include "manager.h"
 
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+/* Console reset button ("IN" connector), needs the internal pull-up */
+#define BOOT_BTN_PIN 16
+#else
 #define BOOT_BTN_PIN 0
+#endif
 
 #define RESET_PIN 14
 
 #define POWER_ON_PIN 13
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+#define POWER_OFF_PIN 17
+#else
 #define POWER_OFF_PIN 16
+#endif
 #define POWER_SENSE_PIN 39
 
 #define POWER_OFF_ALT_PIN 12
@@ -47,10 +56,17 @@
 #define SENSE_P1_ALT_PIN 15
 #define SENSE_P2_ALT_PIN 34
 
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+#define LED_P1_PIN 15
+#define LED_P2_PIN 4
+#define LED_P3_PIN 2
+#define LED_P4_PIN 12
+#else
 #define LED_P1_PIN 2
 #define LED_P2_PIN 4
 #define LED_P3_PIN 12
 #define LED_P4_PIN 15
+#endif
 
 #define INHIBIT_CNT 200
 
@@ -73,6 +89,7 @@ static uint8_t led_list[] = {
 };
 static uint8_t current_pulse_led = LED_P1_PIN;
 static uint8_t err_led_pin;
+static uint8_t err_led_inv;
 static uint8_t power_off_pin = POWER_OFF_PIN;
 static uint8_t led_init_cnt = 1;
 static uint16_t port_state = 0;
@@ -211,10 +228,10 @@ static void set_leds_as_btn_status(uint8_t state) {
 
     /* Use error LED as well */
     if (state) {
-        esp_rom_gpio_connect_out_signal(err_led_pin, ledc_periph_signal[LEDC_LOW_SPEED_MODE].sig_out0_idx + LEDC_CHANNEL_1, 0, 0);
+        esp_rom_gpio_connect_out_signal(err_led_pin, ledc_periph_signal[LEDC_LOW_SPEED_MODE].sig_out0_idx + LEDC_CHANNEL_1, err_led_inv, 0);
     }
     else {
-        esp_rom_gpio_connect_out_signal(err_led_pin, ledc_periph_signal[LEDC_HIGH_SPEED_MODE].sig_out0_idx + LEDC_CHANNEL_0, 0, 0);
+        esp_rom_gpio_connect_out_signal(err_led_pin, ledc_periph_signal[LEDC_HIGH_SPEED_MODE].sig_out0_idx + LEDC_CHANNEL_0, err_led_inv, 0);
     }
 }
 
@@ -487,6 +504,10 @@ static void sys_mgr_inquiry_toggle(void) {
 
 static void sys_mgr_power_on(void) {
     set_power_on(1);
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    /* Stock FW holds the power on line, no pulse */
+    return;
+#endif
     if (!hw_config.power_pin_is_hold) {
         vTaskDelay(hw_config.power_pin_pulse_ms / portTICK_PERIOD_MS);
         set_power_on(0);
@@ -545,6 +566,14 @@ static void sys_mgr_esp_restart(void) {
 
 static void sys_mgr_deep_sleep(void) {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    /* Keep reset button pull-up and console control lines idle while sleeping */
+    gpio_hold_en(BOOT_BTN_PIN);
+    gpio_hold_en(RESET_PIN);
+    gpio_hold_en(POWER_ON_PIN);
+    gpio_hold_en(power_off_pin);
+    gpio_deep_sleep_hold_en();
+#endif
     esp_deep_sleep_start();
 }
 
@@ -580,6 +609,32 @@ void sys_mgr_cmd(uint8_t cmd) {
     }
 }
 
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+/* Set the console control lines to idle as early as possible, like the stock FW */
+void sys_mgr_early_init(void) {
+    gpio_config_t io_conf = {0};
+
+    io_conf.mode = GPIO_MODE_INPUT;
+    io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+    io_conf.pin_bit_mask = 1ULL << BOOT_BTN_PIN;
+    gpio_config(&io_conf);
+
+    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+    io_conf.mode = GPIO_MODE_OUTPUT;
+    gpio_set_level(POWER_ON_PIN, 0);
+    io_conf.pin_bit_mask = 1ULL << POWER_ON_PIN;
+    gpio_config(&io_conf);
+    gpio_set_level(POWER_OFF_PIN, 0);
+    io_conf.pin_bit_mask = 1ULL << POWER_OFF_PIN;
+    gpio_config(&io_conf);
+
+    io_conf.mode = GPIO_MODE_OUTPUT_OD;
+    gpio_set_level(RESET_PIN, 1);
+    io_conf.pin_bit_mask = 1ULL << RESET_PIN;
+    gpio_config(&io_conf);
+}
+#endif
+
 void sys_mgr_init(uint32_t package) {
     gpio_config_t io_conf = {0};
 
@@ -593,6 +648,7 @@ void sys_mgr_init(uint32_t package) {
 
     chip_package = package;
     err_led_pin = err_led_get_pin();
+    err_led_inv = err_led_get_inv();
 
     ledc_timer_config_t ledc_timer = {
         .duty_resolution = LEDC_TIMER_20_BIT,
@@ -648,8 +704,19 @@ void sys_mgr_init(uint32_t package) {
             break;
         case N64:
         case DC:
+            hw_config.port_cnt = 4;
+            break;
         case GC:
             hw_config.port_cnt = 4;
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+            /* Only drive a port once a BT ctrl is connected to it, like the stock FW. */
+            /* Leaves ports free for undetected wired accessories (GBA link cable, etc). */
+            hw_config.hotplug = 1;
+            /* Button hold thresholds from the board manual: 3s / 6s / 9s */
+            hw_config.sw_io0_hold_thres_ms[0] = 3000;
+            hw_config.sw_io0_hold_thres_ms[1] = 6000;
+            hw_config.sw_io0_hold_thres_ms[2] = 9000;
+#endif
             break;
         case PARALLEL_1P:
         case PCE:
@@ -670,6 +737,11 @@ void sys_mgr_init(uint32_t package) {
 #endif
 
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    /* Always internal, keep the console control lines driven since early init */
+    hw_config.external_adapter = 0;
+    (void)internal_flag_init;
+#else
 #ifdef CONFIG_BLUERETRO_HW2
     io_conf.pin_bit_mask = 1ULL << POWER_ON_PIN;
     gpio_config(&io_conf);
@@ -678,6 +750,7 @@ void sys_mgr_init(uint32_t package) {
 #endif
 
     internal_flag_init();
+#endif
 
     hw_config_patch();
 
@@ -766,11 +839,21 @@ void sys_mgr_init(uint32_t package) {
         gpio_set_level(SENSE_P3_PIN, 1);
     }
 
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    /* Stock FW waits 1 s, then always raises IO13 and keeps it high. */
+    /* The console stays black without it. */
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    sys_mgr_power_on();
+    if (sys_mgr_get_boot_btn()) {
+        sys_mgr_deep_sleep();
+    }
+#else
     /* If boot switch pressed at boot, trigger system on and goes to deep sleep */
     if (sys_mgr_get_boot_btn() && !sys_mgr_get_power()) {
         sys_mgr_power_on();
         sys_mgr_deep_sleep();
     }
+#endif
 #endif /* CONFIG_BLUERETRO_HW2 */
 
     xTaskCreatePinnedToCore(sys_mgr_task, "sys_mgr_task", 2048, NULL, 5, NULL, 0);

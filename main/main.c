@@ -150,6 +150,9 @@ static void wl_init_task(void *arg) {
 
 void app_main()
 {
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    sys_mgr_early_init();
+#endif
     adapter_init();
 
     start_app_cpu(wired_init_task);

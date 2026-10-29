@@ -569,6 +569,14 @@ int32_t bt_host_init(void) {
         return ret;
     }
 
+#ifdef CONFIG_BLUERETRO_IBLUE_LOW_POWER
+    /* The board 3V3 supply browns out with the default +3 dBm TX power */
+    esp_bredr_tx_power_set(ESP_PWR_LVL_N12, ESP_PWR_LVL_N0);
+    esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_N0);
+    esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_SCAN, ESP_PWR_LVL_N0);
+    esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_N0);
+#endif
+
     esp_vhci_host_register_callback(&vhci_host_cb);
 
     bt_host_tx_pkt_ready();
@@ -598,6 +606,10 @@ int32_t bt_host_txq_add(uint8_t *packet, uint32_t packet_len) {
 #ifdef CONFIG_BLUERETRO_QEMU
     return 0;
 #else
+    if (txq_hdl == NULL) {
+        /* Bluetooth not initialized */
+        return -1;
+    }
     UBaseType_t ret = xRingbufferSend(txq_hdl, (void *)packet, packet_len, portMAX_DELAY);
     if (ret != pdTRUE) {
         printf("# %s txq full!\n", __FUNCTION__);

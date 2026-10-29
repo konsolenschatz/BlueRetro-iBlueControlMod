@@ -13,6 +13,7 @@
 #define CONFIG_FILE "/fs/config.bin"
 #define MEMORY_CARD_FILE "/fs/mc.bin"
 #define BITSTREAM_FILE "/fs/bitstream.bit"
+#define IBLUE_DEFAULTS_FILE "/fs/iblue_defaults"
 
 int32_t fs_init(void);
 void fs_reset(void);

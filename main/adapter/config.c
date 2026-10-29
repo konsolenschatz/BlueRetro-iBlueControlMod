@@ -223,7 +223,11 @@ static void config_init_struct(struct config *data) {
 
     for (uint32_t i = 0; i < WIRED_MAX_DEV; i++) {
         data->out_cfg[i].dev_mode = DEV_PAD;
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+        data->out_cfg[i].acc_mode = ACC_RUMBLE;
+#else
         data->out_cfg[i].acc_mode = ACC_NONE;
+#endif
         data->in_cfg[i].bt_dev_id = 0x00; /* Not used placeholder */
         data->in_cfg[i].bt_subdev_id = 0x00;  /* Not used placeholder */
         data->in_cfg[i].map_size = KBM_MAX + BR_COMBO_CNT;
@@ -442,6 +446,31 @@ void hw_config_patch(void) {
     }
 }
 
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+/* The stock FW recreates its config (rumble off) after a factory reset, */
+/* so turn rumble on once. A factory reset deletes the marker file again. */
+static void config_iblue_defaults(struct config *data, char *filename) {
+    struct stat st;
+
+    if (stat(IBLUE_DEFAULTS_FILE, &st) == 0) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < WIRED_MAX_DEV; i++) {
+        if (data->out_cfg[i].acc_mode == ACC_NONE) {
+            data->out_cfg[i].acc_mode = ACC_RUMBLE;
+        }
+    }
+    config_store_on_file(data, filename);
+
+    FILE *file = fopen(IBLUE_DEFAULTS_FILE, "wb");
+    if (file) {
+        fclose(file);
+    }
+    printf("# %s: Rumble enabled by default\n", __FUNCTION__);
+}
+#endif
+
 void config_init(uint32_t src) {
     char tmp_str[32] = "/fs/";
     char *filename = CONFIG_FILE;
@@ -459,6 +488,11 @@ void config_init(uint32_t src) {
     }
 
     config_load_from_file(&config, filename);
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    if (config_src == DEFAULT_CFG) {
+        config_iblue_defaults(&config, filename);
+    }
+#endif
     if (config_rst_bare_core && config_is_rst_required()) {
         sys_mgr_cmd(SYS_MGR_CMD_WIRED_RST);
         printf("# %s: Reloaded wired core cfg: %s\n", __FUNCTION__, filename);

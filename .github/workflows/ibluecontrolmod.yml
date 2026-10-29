@@ -1,0 +1,93 @@
+name: ibluecontrolmod
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Create a draft release with this tag (e.g. v25.10-iblue.1), empty = build only'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - br_config: gamecube_ibluecontrolmod
+            br_sys: _gc
+          - br_config: gamecube_ibluecontrolmod_safe
+            br_sys: _gc_safe
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/darthcloud/idf-blueretro:v5.5.0_2024-12-02
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+    - name: Build with ESP-IDF
+      shell: bash
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        . $IDF_PATH/export.sh
+        rm -fr build
+        if [ -n "${{ inputs.release_tag }}" ]; then
+          echo "${{ inputs.release_tag }}${{ matrix.br_sys }}" | tr _ ' ' | cut -c -31 > version.txt
+        else
+          echo "$(git describe --always --tags --dirty) iblue${{ matrix.br_sys }}" | tr _ ' ' | cut -c -31 > version.txt
+        fi
+        cat version.txt
+        cp configs/hw2/${{ matrix.br_config }} sdkconfig
+        set +e
+        BR_HW=_iblue BR_SYS=${{ matrix.br_sys }} idf.py reconfigure build > build.log 2>&1
+        rc=$?
+        set -e
+        tail -50 build.log
+        if [ $rc -ne 0 ]; then
+          grep -E "error|Error|undefined reference|overflow" build.log | head -20 | sed 's/^/::error::/'
+          exit $rc
+        fi
+        python3 tools/ibluecontrolmod/gen_otadata_ota0.py build/otadata_ota0.bin
+        test $(stat -c %s build/BlueRetro_iblue${{ matrix.br_sys }}.bin) -lt 1048576
+        # blueretro.io/ota.html rejects a hw2 image on the stock FW (version "1", seen as HW1)
+        ! head -c 256 build/BlueRetro_iblue${{ matrix.br_sys }}.bin | grep -aq hw2
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: BlueRetro_iblue${{ matrix.br_sys }}
+        path: |
+          build/BlueRetro_iblue${{ matrix.br_sys }}.bin
+          build/otadata_ota0.bin
+        if-no-files-found: error
+
+  release:
+    if: ${{ inputs.release_tag != '' }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    - name: Create draft release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        mkdir -p release
+        cp artifacts/BlueRetro_iblue_gc/BlueRetro_iblue_gc.bin release/
+        cp artifacts/BlueRetro_iblue_gc_safe/BlueRetro_iblue_gc_safe.bin release/
+        cp artifacts/BlueRetro_iblue_gc/otadata_ota0.bin release/
+        cp firmware/otadata_leer.bin release/
+        (cd release && sha256sum * > SHA256SUMS.txt)
+        gh release create "${{ inputs.release_tag }}" release/* --draft \
+          --target "${GITHUB_SHA}" \
+          --title "iBlueControlMod ${{ inputs.release_tag }}" \
+          --notes-file tools/ibluecontrolmod/RELEASE_NOTES.md

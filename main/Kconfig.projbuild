@@ -6,6 +6,28 @@ menu "BlueRetro"
         help
             Select this to enable HW2 features like port detection.
 
+    config BLUERETRO_HW2_IBLUECONTROLMOD
+        bool "Board variant: AliExpress iBlueControlMod GameCube internal (V1.1)"
+        depends on BLUERETRO_HW2
+        default n
+        help
+            Pinout of the AliExpress "iBlueControlMod" GameCube internal
+            controller port board, recovered from its stock firmware:
+            console power off is on IO17 (BlueRetro HW2 uses IO17 for the
+            status LED and IO16 for power off), the port LEDs are ordered
+            IO15/IO4/IO2/IO12, the status LED is an active-low RGB LED
+            on IO18/IO22/IO23 and the console reset button is read on IO16
+            (internal pull-up required) instead of IO0.
+
+    config BLUERETRO_IBLUE_LOW_POWER
+        bool "iBlueControlMod: low BT TX power, no inquiry for 20 s after boot"
+        depends on BLUERETRO_HW2_IBLUECONTROLMOD
+        default n
+        help
+            Fallback for boards whose 3V3 supply browns out: lower the
+            Bluetooth TX power and keep the radio quiet while the console
+            boots.
+
     choice
         prompt "Select universal or specific system"
         default BLUERETRO_SYSTEM_UNIVERSAL

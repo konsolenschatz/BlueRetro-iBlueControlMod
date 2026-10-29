@@ -8,14 +8,22 @@
 #include <soc/efuse_reg.h>
 #include "zephyr/atomic.h"
 #include "system/gpio.h"
+#include "driver/gpio.h"
 #include "driver/ledc.h"
 #include "adapter/config.h"
 #include "led.h"
 
 #ifdef CONFIG_BLUERETRO_SYSTEM_SEA_BOARD
 #define ERR_LED_PIN 32
+#elif defined(CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD)
+/* IO17 is the console power off line on this board, never drive it as LED! */
+#define ERR_LED_PIN 18
+#define ERR_LED_INV 1
 #else
 #define ERR_LED_PIN 17
+#endif
+#ifndef ERR_LED_INV
+#define ERR_LED_INV 0
 #endif
 #define PICO_ERR_LED_PIN 20
 
@@ -59,6 +67,7 @@ void err_led_init(uint32_t package) {
         .speed_mode = LEDC_HIGH_SPEED_MODE,
         .hpoint     = 0,
         .timer_sel  = LEDC_TIMER_0,
+        .flags.output_invert = ERR_LED_INV,
     };
 
     if (package == EFUSE_RD_CHIP_VER_PKG_ESP32PICOV302) {
@@ -99,4 +108,8 @@ void err_led_pulse(void) {
 
 uint32_t err_led_get_pin(void) {
     return err_led_pin;
+}
+
+uint32_t err_led_get_inv(void) {
+    return ERR_LED_INV;
 }

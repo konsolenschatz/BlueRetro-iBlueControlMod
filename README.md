@@ -1,3 +1,31 @@
+# BlueRetro für das AliExpress „iBlueControlMod“ GameCube-Board
+
+Aktuelles [BlueRetro](https://github.com/darthcloud/BlueRetro) für das interne
+Bluetooth-Controllerport-Board „iBlueControlMod“ von AliExpress (Platinenaufdruck „V1.1“).
+Mit 8BitDo-GameCube-Mod-Kit-Unterstützung inklusive analoger Schultertasten und Rumble,
+Schlafmodus und funktionierendem GBA-Link.
+
+* **Download:** [Releases](../../releases), Datei `BlueRetro_iblue_gc.bin`
+* **Anleitung** (Flashen per Bluetooth, Rückweg zur Original-Firmware, Reset-Taste, GBA-Link,
+  Unterschiede zur chinesischen Firmware): [tools/ibluecontrolmod/README.md](tools/ibluecontrolmod/README.md)
+
+> **English:** Current BlueRetro for the AliExpress "iBlueControlMod" internal GameCube board.
+> Get `BlueRetro_iblue_gc.bin` from the releases and flash it with https://blueretro.io/ota.html.
+> Holding the console reset button for 30 s returns to the stock firmware.
+> Support the project: [PayPal](https://www.paypal.biz/PDHBeats) · YouTube: [Konsolenschatz](https://www.youtube.com/@Konsolenschatz)
+> Details (German, with English summary): [tools/ibluecontrolmod/README.md](tools/ibluecontrolmod/README.md)
+
+**Unterstützen:** Wenn dir das Projekt hilft, freue ich mich über eine kleine Spende per
+[PayPal](https://www.paypal.biz/PDHBeats). Mehr Retro-Mods gibt es auf meinem YouTube-Kanal
+[Konsolenschatz](https://www.youtube.com/@Konsolenschatz).
+
+Unabhängiges Community-Projekt, nicht verbunden mit dem Hersteller des Boards oder mit
+dem BlueRetro-Projekt. Nutzung auf eigene Gefahr.
+
+Below is the original BlueRetro README.
+
+---
+
 **This repository has been archived and is no longer under active development or maintenance.**
 
 ```

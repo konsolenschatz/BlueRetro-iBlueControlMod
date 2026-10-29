@@ -683,7 +683,12 @@ void nsi_init(uint32_t package) {
 
     RMT.apb_conf.fifo_mask = 1;
 
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    /* Ports are enabled by sys_mgr hotplug once a BT ctrl connects */
+    nsi_port_cfg((wired_adapter.system_id == GC) ? 0x0 : 0xF);
+#else
     nsi_port_cfg(0xF);
+#endif
 
     for (uint32_t i = 0; i < ARRAY_SIZE(gpio_pin); i++) {
         RMT.conf_ch[rmt_ch[i][system]].conf0.div_cnt = 40; /* 80MHz (APB CLK) / 40 = 0.5us TICK */;

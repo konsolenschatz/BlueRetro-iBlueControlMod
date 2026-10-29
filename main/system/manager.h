@@ -21,5 +21,8 @@ enum {
 
 void sys_mgr_cmd(uint8_t cmd);
 void sys_mgr_init(uint32_t package);
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+void sys_mgr_early_init(void);
+#endif
 
 #endif /* _SYS_MANAGER_H_ */

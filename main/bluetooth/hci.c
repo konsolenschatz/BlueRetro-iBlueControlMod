@@ -4,6 +4,7 @@
  */
 
 #include <stdio.h>
+#include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/ringbuf.h>
@@ -1265,6 +1266,12 @@ const char *bt_hci_get_device_name(void) {
 }
 
 void bt_hci_start_inquiry(void) {
+#ifdef CONFIG_BLUERETRO_IBLUE_LOW_POWER
+    /* Keep the radio quiet while the console boots, the board supply sags */
+    if (esp_timer_get_time() < 20 * 1000 * 1000) {
+        return;
+    }
+#endif
     if (!inquiry_override) {
         err_led_pulse();
         inquiry_state = 1;
