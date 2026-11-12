@@ -7,6 +7,7 @@ Bluetooth controller port board for the GameCube (PCB marking "V1.1").
 * **Nintendo Switch 2 / NSO GameCube controller** fixes from RyanCopley/BlueRetro (several pads at once, no more lock-outs after a bad pairing)
 * All BlueRetro improvements since v1.9, which the stock firmware is based on
 * **Rumble enabled out of the box**
+* **Top LED like the stock firmware:** solid green while the console is on, red in sleep mode
 * **Sleep mode** (hold the reset button for 3 s while powering on), e.g. for Final Fantasy
   Crystal Chronicles with the GBA as controller
 * **GBA link** with a BT controller, e.g. Pokémon Colosseum ↔ Pokémon LeafGreen
@@ -48,7 +49,7 @@ channel [Konsolenschatz](https://www.youtube.com/@Konsolenschatz).
 ---
 
 **Deutsch:** Aktuelles BlueRetro für das AliExpress-Board „iBlueControlMod“ mit Unterstützung
-für das 8BitDo GameCube Mod Kit (analoge Schultertasten, Rumble), Fixes für den NSO-GameCube-Controller, Rumble ab Werk, Schlafmodus
+für das 8BitDo GameCube Mod Kit (analoge Schultertasten, Rumble), Fixes für den NSO-GameCube-Controller, Rumble ab Werk, obere LED wie im Original (dauerhaft grün), Schlafmodus
 (Reset-Taste beim Einschalten 3 s halten) und funktionierendem GBA-Link. `BlueRetro_iblue_gc.bin`
 über https://blueretro.io/ota.html flashen; zurück zur Original-Firmware mit 30 s Reset-Taste.
 [Ausführliche Anleitung auf Deutsch](https://github.com/konsolenschatz/BlueRetro-iBlueControlMod/blob/master/tools/ibluecontrolmod/README.de.md)
