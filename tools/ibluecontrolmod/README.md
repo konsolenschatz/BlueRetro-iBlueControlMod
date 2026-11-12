@@ -105,6 +105,14 @@ boots normally. Meant for accessories that don't get along with BlueRetro, e.g. 
 controller in Final Fantasy Crystal Chronicles. Use a wired original controller to play.
 Back to normal: switch the console off and on again without holding the button.
 
+## Top LED
+
+| Colour | Meaning |
+|---|---|
+| green | Console on, no Bluetooth controller connected (while pairing, the port LED pulses) |
+| blue | At least one Bluetooth controller connected |
+| red | Sleep mode, or a fatal error (e.g. Bluetooth failed to start) |
+
 ## GBA link
 
 The board only drives a controller port when a Bluetooth controller is assigned to it.

@@ -232,6 +232,7 @@ static void set_leds_as_btn_status(uint8_t state) {
     }
     else {
         esp_rom_gpio_connect_out_signal(err_led_pin, ledc_periph_signal[LEDC_HIGH_SPEED_MODE].sig_out0_idx + LEDC_CHANNEL_0, err_led_inv, 0);
+        err_led_refresh();
     }
 }
 
@@ -288,6 +289,7 @@ static void wired_port_hdl(void) {
     uint32_t update = 0;
     uint16_t port_mask = 0;
     uint8_t err_led_set = 0;
+    uint32_t bt_connected = 0;
 
     for (int32_t i = 0, j = 0, idx = 0; i < BT_MAX_DEV; i++) {
         struct bt_dev *device = NULL;
@@ -305,6 +307,7 @@ static void wired_port_hdl(void) {
         }
 
         bt_ready = atomic_test_bit(&device->flags, BT_DEV_HID_INIT_DONE);
+        bt_connected |= bt_ready;
 
 #ifdef CONFIG_BLUERETRO_HW2
         int32_t prev_idx = device->ids.out_idx;
@@ -353,6 +356,7 @@ static void wired_port_hdl(void) {
         }
 #endif
     }
+    err_led_bt_connected(bt_connected);
     if (hw_config.hotplug) {
         if (port_state != port_mask) {
             update++;
@@ -572,6 +576,7 @@ static void sys_mgr_deep_sleep(void) {
     gpio_hold_en(RESET_PIN);
     gpio_hold_en(POWER_ON_PIN);
     gpio_hold_en(power_off_pin);
+    err_led_sleep();
     gpio_deep_sleep_hold_en();
 #endif
     esp_deep_sleep_start();

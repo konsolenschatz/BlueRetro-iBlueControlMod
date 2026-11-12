@@ -10,6 +10,8 @@
 #include "system/gpio.h"
 #include "driver/gpio.h"
 #include "driver/ledc.h"
+#include "esp_rom_gpio.h"
+#include "soc/gpio_sig_map.h"
 #include "adapter/config.h"
 #include "led.h"
 
@@ -17,8 +19,11 @@
 #define ERR_LED_PIN 32
 #elif defined(CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD)
 /* IO17 is the console power off line on this board, never drive it as LED! */
-#define ERR_LED_PIN 18
+/* Top RGB LED, active low: green IO22 (status like the stock FW), blue IO23, red IO18 */
+#define ERR_LED_PIN 22
 #define ERR_LED_INV 1
+#define STATUS_LED_BLUE_PIN 23
+#define STATUS_LED_RED_PIN 18
 #else
 #define ERR_LED_PIN 17
 #endif
@@ -30,11 +35,74 @@
 /* LED flags */
 enum {
     ERR_LED_SET = 0,
+    ERR_LED_BT_CONNECTED,
 };
 
 static atomic_t led_flags = 0;
 static TaskHandle_t err_led_task_hdl;
 static uint8_t err_led_pin = ERR_LED_PIN;
+
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+static void status_led_set_pin(uint8_t pin, uint32_t on) {
+    esp_rom_gpio_connect_out_signal(pin, SIG_GPIO_OUT_IDX, false, false);
+    gpio_set_level(pin, !on);
+}
+
+/* Like the stock FW: solid green while the console is on (pairing is shown */
+/* by the pulsing port LED only), blue once a BT controller is connected, */
+/* red on error and while sleeping */
+static void status_led_update(void) {
+    if (atomic_test_bit(&led_flags, ERR_LED_SET)) {
+        status_led_set_pin(ERR_LED_PIN, 0);
+        status_led_set_pin(STATUS_LED_BLUE_PIN, 0);
+        status_led_set_pin(STATUS_LED_RED_PIN, 1);
+    }
+    else if (atomic_test_bit(&led_flags, ERR_LED_BT_CONNECTED)) {
+        status_led_set_pin(ERR_LED_PIN, 0);
+        status_led_set_pin(STATUS_LED_BLUE_PIN, 1);
+    }
+    else {
+        status_led_set_pin(ERR_LED_PIN, 1);
+        status_led_set_pin(STATUS_LED_BLUE_PIN, 0);
+    }
+}
+
+void err_led_bt_connected(uint32_t connected) {
+    if (connected) {
+        if (atomic_test_and_set_bit(&led_flags, ERR_LED_BT_CONNECTED)) {
+            return;
+        }
+    }
+    else if (!atomic_test_and_clear_bit(&led_flags, ERR_LED_BT_CONNECTED)) {
+        return;
+    }
+    status_led_update();
+}
+
+void err_led_refresh(void) {
+    status_led_update();
+}
+
+void err_led_sleep(void) {
+    /* Red while sleeping, like the stock FW */
+    status_led_set_pin(ERR_LED_PIN, 0);
+    status_led_set_pin(STATUS_LED_BLUE_PIN, 0);
+    status_led_set_pin(STATUS_LED_RED_PIN, 1);
+    gpio_hold_en(ERR_LED_PIN);
+    gpio_hold_en(STATUS_LED_BLUE_PIN);
+    gpio_hold_en(STATUS_LED_RED_PIN);
+}
+#else
+void err_led_bt_connected(uint32_t connected) {
+    (void)connected;
+}
+
+void err_led_refresh(void) {
+}
+
+void err_led_sleep(void) {
+}
+#endif
 
 static void err_led_task(void *param) {
     while (1) {
@@ -80,8 +148,19 @@ void err_led_init(uint32_t package) {
     ledc_fade_func_install(0);
     ledc_set_duty_and_update(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, hw_config.led_pulse_off_duty_cycle, 0);
 
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    gpio_config_t io_conf = {
+        .pin_bit_mask = BIT64(STATUS_LED_BLUE_PIN) | BIT64(STATUS_LED_RED_PIN),
+        .mode = GPIO_MODE_OUTPUT,
+    };
+    gpio_set_level(STATUS_LED_BLUE_PIN, 1);
+    gpio_set_level(STATUS_LED_RED_PIN, 1);
+    gpio_config(&io_conf);
+#endif
+
     xTaskCreatePinnedToCore(&err_led_task, "err_led_task", 768, NULL, 5, &err_led_task_hdl, 0);
     err_led_clear();
+    err_led_refresh();
 }
 
 void err_led_cfg_update(void) {
@@ -92,6 +171,7 @@ void err_led_set(void) {
     vTaskSuspend(err_led_task_hdl);
     ledc_set_duty_and_update(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, hw_config.led_pulse_on_duty_cycle, 0);
     atomic_set_bit(&led_flags, ERR_LED_SET);
+    err_led_refresh();
 }
 
 void err_led_clear(void) {

@@ -107,6 +107,14 @@ BlueRetro nicht verträgt, zum Beispiel den GBA als Controller in Final Fantasy 
 Chronicles. Zum Steuern dann einen Original-Controller mit Kabel benutzen.
 Normalbetrieb: Konsole aus- und ohne gedrückte Taste wieder einschalten.
 
+## Obere LED
+
+| Farbe | Bedeutung |
+|---|---|
+| grün | Konsole an, kein Bluetooth-Controller verbunden (beim Koppeln pulsiert die Port-LED) |
+| blau | Mindestens ein Bluetooth-Controller verbunden |
+| rot | Schlafmodus oder schwerer Fehler (z. B. Bluetooth startet nicht) |
+
 ## GBA-Link
 
 Das Board treibt einen Controller-Port nur, wenn dort ein Bluetooth-Controller
