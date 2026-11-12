@@ -111,8 +111,7 @@ Normalbetrieb: Konsole aus- und ohne gedrückte Taste wieder einschalten.
 
 | Farbe | Bedeutung |
 |---|---|
-| grün | Konsole an, kein Bluetooth-Controller verbunden (beim Koppeln pulsiert die Port-LED) |
-| blau | Mindestens ein Bluetooth-Controller verbunden |
+| grün | Konsole an, mit oder ohne Bluetooth-Controller (beim Koppeln pulsiert die Port-LED) |
 | rot | Schlafmodus oder schwerer Fehler (z. B. Bluetooth startet nicht) |
 
 ## GBA-Link

@@ -289,7 +289,6 @@ static void wired_port_hdl(void) {
     uint32_t update = 0;
     uint16_t port_mask = 0;
     uint8_t err_led_set = 0;
-    uint32_t bt_connected = 0;
 
     for (int32_t i = 0, j = 0, idx = 0; i < BT_MAX_DEV; i++) {
         struct bt_dev *device = NULL;
@@ -307,7 +306,6 @@ static void wired_port_hdl(void) {
         }
 
         bt_ready = atomic_test_bit(&device->flags, BT_DEV_HID_INIT_DONE);
-        bt_connected |= bt_ready;
 
 #ifdef CONFIG_BLUERETRO_HW2
         int32_t prev_idx = device->ids.out_idx;
@@ -356,7 +354,6 @@ static void wired_port_hdl(void) {
         }
 #endif
     }
-    err_led_bt_connected(bt_connected);
     if (hw_config.hotplug) {
         if (port_state != port_mask) {
             update++;

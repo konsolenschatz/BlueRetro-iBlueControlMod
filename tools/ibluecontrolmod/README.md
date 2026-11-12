@@ -109,8 +109,7 @@ Back to normal: switch the console off and on again without holding the button.
 
 | Colour | Meaning |
 |---|---|
-| green | Console on, no Bluetooth controller connected (while pairing, the port LED pulses) |
-| blue | At least one Bluetooth controller connected |
+| green | Console on, with or without Bluetooth controllers (while pairing, the port LED pulses) |
 | red | Sleep mode, or a fatal error (e.g. Bluetooth failed to start) |
 
 ## GBA link

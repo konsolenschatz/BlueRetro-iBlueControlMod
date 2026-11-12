@@ -35,7 +35,6 @@
 /* LED flags */
 enum {
     ERR_LED_SET = 0,
-    ERR_LED_BT_CONNECTED,
 };
 
 static atomic_t led_flags = 0;
@@ -48,8 +47,8 @@ static void status_led_set_pin(uint8_t pin, uint32_t on) {
     gpio_set_level(pin, !on);
 }
 
-/* Like the stock FW: solid green while the console is on (pairing is shown */
-/* by the pulsing port LED only), blue once a BT controller is connected, */
+/* Like the stock FW: solid green while the console is on, whether a BT */
+/* controller is connected or not (pairing is shown by the pulsing port LED), */
 /* red on error and while sleeping */
 static void status_led_update(void) {
     if (atomic_test_bit(&led_flags, ERR_LED_SET)) {
@@ -57,26 +56,10 @@ static void status_led_update(void) {
         status_led_set_pin(STATUS_LED_BLUE_PIN, 0);
         status_led_set_pin(STATUS_LED_RED_PIN, 1);
     }
-    else if (atomic_test_bit(&led_flags, ERR_LED_BT_CONNECTED)) {
-        status_led_set_pin(ERR_LED_PIN, 0);
-        status_led_set_pin(STATUS_LED_BLUE_PIN, 1);
-    }
     else {
         status_led_set_pin(ERR_LED_PIN, 1);
         status_led_set_pin(STATUS_LED_BLUE_PIN, 0);
     }
-}
-
-void err_led_bt_connected(uint32_t connected) {
-    if (connected) {
-        if (atomic_test_and_set_bit(&led_flags, ERR_LED_BT_CONNECTED)) {
-            return;
-        }
-    }
-    else if (!atomic_test_and_clear_bit(&led_flags, ERR_LED_BT_CONNECTED)) {
-        return;
-    }
-    status_led_update();
 }
 
 void err_led_refresh(void) {
@@ -93,10 +76,6 @@ void err_led_sleep(void) {
     gpio_hold_en(STATUS_LED_RED_PIN);
 }
 #else
-void err_led_bt_connected(uint32_t connected) {
-    (void)connected;
-}
-
 void err_led_refresh(void) {
 }
 
