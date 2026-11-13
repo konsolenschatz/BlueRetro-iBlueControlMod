@@ -107,12 +107,28 @@ BlueRetro nicht verträgt, zum Beispiel den GBA als Controller in Final Fantasy 
 Chronicles. Zum Steuern dann einen Original-Controller mit Kabel benutzen.
 Normalbetrieb: Konsole aus- und ohne gedrückte Taste wieder einschalten.
 
+## Soft-Off per Controller
+
+Bei **eingeschaltetem** Power-Knopf am Bluetooth-Controller **L + R + Start + D-Pad rechts**
+gleichzeitig drücken (GameCube-Layout) und loslassen. Alle Controller werden getrennt, die
+Konsole wird dunkel und alle LEDs gehen aus. Zum Aufwecken einen gekoppelten Controller wieder
+einschalten (z. B. Home-/Power-Taste) oder die Reset-Taste der Konsole drücken: Die Konsole
+startet neu.
+
+* Das ist kein echtes Ausschalten: Das Board hält die Konsole in einem dunklen Zustand. Ganz
+  aus geht sie mit dem Power-Knopf.
+* Nicht auslösen, während ein Spiel auf die Memory Card speichert.
+* Die Ausschalt-Kombination wurde von L + R + Start + A (BlueRetro-Standard) verlegt, weil das
+  in Super Smash Bros. Melee der Match-Reset ist. Bestehende Einstellungen werden einmalig
+  automatisch umgestellt.
+
 ## Obere LED
 
 | Farbe | Bedeutung |
 |---|---|
 | grün | Konsole an, mit oder ohne Bluetooth-Controller (beim Koppeln pulsiert die Port-LED) |
 | rot | Schlafmodus oder schwerer Fehler (z. B. Bluetooth startet nicht) |
+| aus | Soft-Off (siehe oben) |
 
 ## GBA-Link
 

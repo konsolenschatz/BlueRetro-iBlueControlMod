@@ -16,6 +16,7 @@ void err_led_pulse(void);
 uint32_t err_led_get_pin(void);
 uint32_t err_led_get_inv(void);
 void err_led_refresh(void);
+void err_led_soft_off(uint32_t off);
 void err_led_sleep(void);
 
 #endif /* _LED_H_ */

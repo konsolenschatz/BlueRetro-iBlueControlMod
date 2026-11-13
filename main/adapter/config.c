@@ -112,7 +112,13 @@ static uint32_t config_version_magic[] = {
     CONFIG_MAGIC_V3,
 };
 static uint8_t config_default_combo[BR_COMBO_CNT] = {
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    /* Power off (soft off) on L + R + Start + D-pad right: L + R + Start + A is */
+    /* the match reset in Super Smash Bros. Melee */
+    PAD_LM, PAD_RM, PAD_MM, PAD_RB_UP, PAD_RB_LEFT, PAD_RB_RIGHT, PAD_LD_RIGHT, PAD_LD_UP, PAD_LD_DOWN, PAD_MS
+#else
     PAD_LM, PAD_RM, PAD_MM, PAD_RB_UP, PAD_RB_LEFT, PAD_RB_RIGHT, PAD_RB_DOWN, PAD_LD_UP, PAD_LD_DOWN, PAD_MS
+#endif
 };
 static bool config_rst_bare_core = false;
 
@@ -469,6 +475,35 @@ static void config_iblue_defaults(struct config *data, char *filename) {
     }
     printf("# %s: Rumble enabled by default\n", __FUNCTION__);
 }
+
+/* Move the power off combo of an existing config from A to D-pad right, once */
+static void config_iblue_combo(struct config *data, char *filename) {
+    struct stat st;
+    uint32_t changed = 0;
+
+    if (stat(IBLUE_COMBO_FILE, &st) == 0) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < WIRED_MAX_DEV; i++) {
+        for (uint32_t j = 0; j < data->in_cfg[i].map_size && j < ADAPTER_MAPPING_MAX; j++) {
+            if (data->in_cfg[i].map_cfg[j].dst_btn == BR_COMBO_SYS_POWER_OFF
+                    && data->in_cfg[i].map_cfg[j].src_btn == PAD_RB_DOWN) {
+                data->in_cfg[i].map_cfg[j].src_btn = PAD_LD_RIGHT;
+                changed++;
+            }
+        }
+    }
+    if (changed) {
+        config_store_on_file(data, filename);
+    }
+
+    FILE *file = fopen(IBLUE_COMBO_FILE, "wb");
+    if (file) {
+        fclose(file);
+    }
+    printf("# %s: Power off combo on D-pad right (%ld)\n", __FUNCTION__, changed);
+}
 #endif
 
 void config_init(uint32_t src) {
@@ -491,6 +526,7 @@ void config_init(uint32_t src) {
 #ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
     if (config_src == DEFAULT_CFG) {
         config_iblue_defaults(&config, filename);
+        config_iblue_combo(&config, filename);
     }
 #endif
     if (config_rst_bare_core && config_is_rst_required()) {

@@ -14,6 +14,7 @@
 #define MEMORY_CARD_FILE "/fs/mc.bin"
 #define BITSTREAM_FILE "/fs/bitstream.bit"
 #define IBLUE_DEFAULTS_FILE "/fs/iblue_defaults"
+#define IBLUE_COMBO_FILE "/fs/iblue_combo_v1"
 
 int32_t fs_init(void);
 void fs_reset(void);

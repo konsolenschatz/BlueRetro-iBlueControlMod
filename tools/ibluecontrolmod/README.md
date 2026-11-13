@@ -105,12 +105,26 @@ boots normally. Meant for accessories that don't get along with BlueRetro, e.g. 
 controller in Final Fantasy Crystal Chronicles. Use a wired original controller to play.
 Back to normal: switch the console off and on again without holding the button.
 
+## Soft off with a controller
+
+With the console's power button **on**, hold **L + R + Start + D-pad right** on a Bluetooth
+controller (GameCube layout) and release. All controllers are disconnected, the console goes
+dark and all LEDs turn off. To wake it, switch a paired controller back on (e.g. press its
+Home/power button) or press the console's reset button: the console boots again.
+
+* This is not a real power off: the board keeps the console in a dark state. Use the power
+  button to switch it off completely.
+* Don't do it while a game saves to the memory card.
+* The power off combo was moved from upstream's L + R + Start + A, which is the match reset in
+  Super Smash Bros. Melee. Existing settings are switched over once automatically.
+
 ## Top LED
 
 | Colour | Meaning |
 |---|---|
 | green | Console on, with or without Bluetooth controllers (while pairing, the port LED pulses) |
 | red | Sleep mode, or a fatal error (e.g. Bluetooth failed to start) |
+| off | Soft off (see above) |
 
 ## GBA link
 

@@ -96,6 +96,12 @@ static uint16_t port_state = 0;
 static RingbufHandle_t cmd_q_hdl = NULL;
 static uint32_t chip_package = EFUSE_RD_CHIP_VER_PKG_ESP32D0WDQ6;
 static bool factory_reset = false;
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+/* Soft off: IO13 low keeps the console dark while the board stays powered */
+static bool soft_off = false;
+static TickType_t soft_off_tick;
+#define SOFT_OFF_WAKE_GUARD_MS 3000
+#endif
 
 static int32_t sys_mgr_get_power(void);
 static int32_t sys_mgr_get_boot_btn(void);
@@ -270,7 +276,12 @@ static void power_on_hdl(void) {
             /* Kick BT controllers on off transition */
             bt_host_disconnect_all();
         }
-        else if (bt_host_get_hid_init_dev(&not_used) > -1) {
+        else if (bt_host_get_hid_init_dev(&not_used) > -1
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+                /* Ignore controllers still dropping right after soft off */
+                && (xTaskGetTickCount() - soft_off_tick) > pdMS_TO_TICKS(SOFT_OFF_WAKE_GUARD_MS)
+#endif
+                ) {
             /* Power on BT connect */
             bt_hci_inquiry_override(0);
             sys_mgr_power_on();
@@ -507,6 +518,11 @@ static void sys_mgr_power_on(void) {
     set_power_on(1);
 #ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
     /* Stock FW holds the power on line, no pulse */
+    if (soft_off) {
+        printf("# %s: Wake from soft off\n", __FUNCTION__);
+        soft_off = false;
+        err_led_soft_off(0);
+    }
     return;
 #endif
     if (!hw_config.power_pin_is_hold) {
@@ -517,6 +533,17 @@ static void sys_mgr_power_on(void) {
 
 static void sys_mgr_power_off(void) {
     bt_host_disconnect_all();
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    /* No IO17 pulse: a real power off would also cut the board's own supply */
+    /* (fan line), leaving nothing to wake the console. Only drop IO13: the */
+    /* console goes dark and a BT controller connecting wakes it again */
+    printf("# %s: Soft off\n", __FUNCTION__);
+    soft_off_tick = xTaskGetTickCount();
+    soft_off = true;
+    set_power_on(0);
+    err_led_soft_off(1);
+    return;
+#endif
 #ifdef CONFIG_BLUERETRO_HW2
     if (hw_config.power_pin_is_hold) {
         set_power_on(0);
@@ -536,6 +563,11 @@ static int32_t sys_mgr_get_power(void) {
     if (hw_config.external_adapter) {
         return 1;
     }
+#ifdef CONFIG_BLUERETRO_HW2_IBLUECONTROLMOD
+    else if (soft_off) {
+        return 0;
+    }
+#endif
     else {
         return gpio_get_level(POWER_SENSE_PIN);
     }
